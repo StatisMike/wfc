@@ -721,7 +721,7 @@ pub struct Context {
     num_cells_with_more_than_one_weighted_compatible_pattern: u32,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Observe {
     Incomplete,
     Complete,
@@ -943,6 +943,12 @@ struct RunBorrowCore<'a, W: Wrap = WrapXY> {
 pub struct WaveCellRef<'a> {
     wave_cell: &'a WaveCell,
     global_stats: &'a GlobalStats,
+}
+
+impl<'a> AsRef<WaveCell> for WaveCellRef<'a> {
+    fn as_ref(&self) -> &WaveCell {
+        self.wave_cell
+    }
 }
 
 pub enum WaveCellRefWeight {
