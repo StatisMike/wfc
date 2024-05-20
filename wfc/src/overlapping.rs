@@ -143,11 +143,10 @@ impl<T: Eq + Clone + Hash> OverlappingPatterns<T> {
     pub fn id_grid_original_orientation(&self) -> Grid<PatternId> {
         let id_grid = self.id_grid();
         Grid::new_fn(id_grid.size(), |coord| {
-            id_grid
+            *id_grid
                 .get_checked(coord)
                 .get(Orientation::Original)
                 .expect("Missing original orientation")
-                .clone()
         })
     }
     fn compatible_patterns<'b>(

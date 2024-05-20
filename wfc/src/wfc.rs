@@ -29,6 +29,9 @@ impl<T> PatternTable<T> {
     pub fn len(&self) -> usize {
         self.table.len()
     }
+    pub fn is_empty(&self) -> bool {
+        self.table.is_empty()
+    }
     pub fn drain(&mut self) -> ::std::vec::Drain<T> {
         self.table.drain(..)
     }
@@ -615,6 +618,7 @@ struct CoordEntropy {
     entropy_with_noise: EntropyWithNoise,
 }
 
+#[allow(clippy::non_canonical_partial_ord_impl)]
 impl PartialOrd for CoordEntropy {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         other
@@ -631,7 +635,7 @@ impl Ord for CoordEntropy {
         if self == other {
             return Ordering::Equal;
         }
-        return Ordering::Greater;
+        Ordering::Greater
     }
 }
 
@@ -658,23 +662,21 @@ impl<'a> CellAtCoordMut<'a> {
             .num_ways_to_become_each_pattern
             .enumerate_mut()
         {
-            if pattern_id != pattern_id_to_keep {
-                if !num_ways_to_become_pattern.is_zero() {
-                    num_ways_to_become_pattern.clear_all_directions();
-                    assert!(self.wave_cell.num_compatible_patterns >= 1);
-                    self.wave_cell.num_compatible_patterns -= 1;
-                    if let Some(pattern_stats) = global_stats.pattern_stats(pattern_id) {
-                        self.wave_cell
-                            .stats
-                            .remove_compatible_pattern(pattern_stats);
-                    }
-                    propagator
-                        .removed_patterns_to_propagate
-                        .push(RemovedPattern {
-                            coord: self.coord,
-                            pattern_id,
-                        });
+            if pattern_id != pattern_id_to_keep && !num_ways_to_become_pattern.is_zero() {
+                num_ways_to_become_pattern.clear_all_directions();
+                assert!(self.wave_cell.num_compatible_patterns >= 1);
+                self.wave_cell.num_compatible_patterns -= 1;
+                if let Some(pattern_stats) = global_stats.pattern_stats(pattern_id) {
+                    self.wave_cell
+                        .stats
+                        .remove_compatible_pattern(pattern_stats);
                 }
+                propagator
+                    .removed_patterns_to_propagate
+                    .push(RemovedPattern {
+                        coord: self.coord,
+                        pattern_id,
+                    });
             }
         }
     }
@@ -759,7 +761,7 @@ impl<'a> WaveCellHandle<'a> {
         self.cell_at_coord_mut.remove_all_patterns_except_one(
             pattern_id,
             self.global_stats,
-            &mut self.propagator,
+            self.propagator,
         );
     }
     fn forbid_pattern(&mut self, pattern_id: PatternId) {
@@ -851,7 +853,7 @@ impl Context {
         let pattern_id = cell_at_coord.wave_cell.choose_pattern_id(global_stats, rng);
         cell_at_coord.remove_all_patterns_except_one(
             pattern_id,
-            &global_stats,
+            global_stats,
             &mut self.propagator,
         );
         self.num_cells_with_more_than_one_weighted_compatible_pattern -= 1;
@@ -968,20 +970,17 @@ pub struct MultipleWeightedPatternsEnumerateWeights<'a> {
 impl<'a> Iterator for MultipleWeightedPatternsEnumerateWeights<'a> {
     type Item = (PatternId, u32);
     fn next(&mut self) -> Option<Self::Item> {
-        while let Some((pattern_id_usize, (num_ways_to_become_pattern, pattern_stats))) =
-            self.iter.next()
+        for (pattern_id_usize, (num_ways_to_become_pattern, pattern_stats)) in
+            self.iter.by_ref()
         {
             if num_ways_to_become_pattern.is_zero() {
                 continue;
-            } else {
-                let pattern_id = pattern_id_usize as PatternId;
-                let weight =
-                    match pattern_stats.map(|pattern_stats| pattern_stats.weight()) {
-                        Some(weight) => weight,
-                        None => 0,
-                    };
-                return Some((pattern_id, weight));
             }
+            let pattern_id = pattern_id_usize as PatternId;
+            let weight = pattern_stats
+                .map(|pattern_stats| pattern_stats.weight())
+                .unwrap_or(0);
+            return Some((pattern_id, weight));
         }
         None
     }
@@ -1093,7 +1092,7 @@ impl<'a, W: Wrap> RunBorrowCore<'a, W> {
 
     fn reset<R: Rng>(&mut self, rng: &mut R) {
         self.wave.init(self.global_stats, rng);
-        self.context.init(&self.wave, self.global_stats);
+        self.context.init(self.wave, self.global_stats);
     }
 
     fn propagate(&mut self) -> Result<(), PropagateError> {

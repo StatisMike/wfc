@@ -60,11 +60,10 @@ impl ForbidPattern for Forbid {
     fn forbid<W: Wrap, R: Rng>(&mut self, fi: &mut ForbidInterface<W>, rng: &mut R) {
         let output_size = fi.wave_size();
         (0..(output_size.width() as i32))
-            .map(|x| Coord::new(x, output_size.height() as i32 - self.offset as i32))
+            .map(|x| Coord::new(x, output_size.height() as i32 - self.offset))
             .chain(
-                (0..(output_size.width() as i32)).map(|y| {
-                    Coord::new(output_size.width() as i32 - self.offset as i32, y)
-                }),
+                (0..(output_size.width() as i32))
+                    .map(|y| Coord::new(output_size.width() as i32 - self.offset, y)),
             )
             .for_each(|coord| {
                 self.pattern_ids.iter().for_each(|&pattern_id| {

@@ -6,7 +6,7 @@ use rand::Rng;
 
 pub trait RetryOwn: private::Sealed {
     type Return;
-    fn retry<'a, W, F, R>(&mut self, run: RunOwn<'a, W, F>, rng: &mut R) -> Self::Return
+    fn retry<W, F, R>(&mut self, run: RunOwn<'_, W, F>, rng: &mut R) -> Self::Return
     where
         W: Wrap + Clone + Sync + Send,
         F: ForbidPattern + Clone + Sync + Send,
@@ -18,11 +18,7 @@ pub struct Forever;
 
 impl RetryOwn for Forever {
     type Return = Wave;
-    fn retry<'a, W, F, R>(
-        &mut self,
-        mut run: RunOwn<'a, W, F>,
-        rng: &mut R,
-    ) -> Self::Return
+    fn retry<W, F, R>(&mut self, mut run: RunOwn<'_, W, F>, rng: &mut R) -> Self::Return
     where
         W: Wrap + Clone + Sync + Send,
         F: ForbidPattern + Clone + Sync + Send,
@@ -89,11 +85,7 @@ pub struct NumTimes(pub usize);
 
 impl RetryOwn for NumTimes {
     type Return = Result<Wave, PropagateError>;
-    fn retry<'a, W, F, R>(
-        &mut self,
-        mut run: RunOwn<'a, W, F>,
-        rng: &mut R,
-    ) -> Self::Return
+    fn retry<W, F, R>(&mut self, mut run: RunOwn<'_, W, F>, rng: &mut R) -> Self::Return
     where
         W: Wrap + Clone + Sync + Send,
         F: ForbidPattern + Clone + Sync + Send,
@@ -200,9 +192,9 @@ impl RetryOwnAll for ParNumTimes {
 
 pub trait RetryBorrow: private::Sealed {
     type Return;
-    fn retry<'a, W, F, R>(
+    fn retry<W, F, R>(
         &mut self,
-        run: &mut RunBorrow<'a, W, F>,
+        run: &mut RunBorrow<'_, W, F>,
         rng: &mut R,
     ) -> Self::Return
     where
@@ -213,9 +205,9 @@ pub trait RetryBorrow: private::Sealed {
 
 impl RetryBorrow for Forever {
     type Return = ();
-    fn retry<'a, W, F, R>(
+    fn retry<W, F, R>(
         &mut self,
-        run: &mut RunBorrow<'a, W, F>,
+        run: &mut RunBorrow<'_, W, F>,
         rng: &mut R,
     ) -> Self::Return
     where
@@ -234,9 +226,9 @@ impl RetryBorrow for Forever {
 
 impl RetryBorrow for NumTimes {
     type Return = Result<(), PropagateError>;
-    fn retry<'a, W, F, R>(
+    fn retry<W, F, R>(
         &mut self,
-        run: &mut RunBorrow<'a, W, F>,
+        run: &mut RunBorrow<'_, W, F>,
         rng: &mut R,
     ) -> Self::Return
     where

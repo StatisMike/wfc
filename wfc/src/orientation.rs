@@ -95,11 +95,17 @@ pub struct OrientationTable<T> {
     table: [Option<T>; NUM_ORIENTATIONS],
 }
 
-impl<T> OrientationTable<T> {
-    pub fn new() -> Self {
+impl<T> Default for OrientationTable<T> {
+    fn default() -> Self {
         Self {
             table: [None, None, None, None, None, None, None, None],
         }
+    }
+}
+
+impl<T> OrientationTable<T> {
+    pub fn new() -> Self {
+        Default::default()
     }
     pub fn get(&self, orientation: Orientation) -> Option<&T> {
         self.table[orientation as usize].as_ref()
