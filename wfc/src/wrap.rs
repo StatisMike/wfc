@@ -1,5 +1,11 @@
 use coord_2d::{Coord, Size};
 
+/// Strategy for wrapping the patterns over input and output grids.
+///
+/// - [`WrapNone`] - no wrapping is done.
+/// - [`WrapX`] and [`WrapY`] - wrapping either on `x` (horizontal) or `y`
+/// (vertical) axis.
+/// - [`WrapXY`] - wrapping around both axis.
 pub trait Wrap: Copy + Send + Sync + private::Sealed {
     #[doc(hidden)]
     fn normalize_coord(coord: Coord, size: Size) -> Option<Coord>;

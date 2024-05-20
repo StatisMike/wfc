@@ -3,37 +3,53 @@ use coord_2d::{Coord, Size};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(u8)]
 pub enum Orientation {
-    /// ##.
+    /// ```
+    /// xx.
     /// ...
     /// ...
+    /// ```
     Original,
-    /// ..#
-    /// ..#
+    /// ```
+    /// ..x
+    /// ..x
     /// ...
+    /// ```
     Clockwise90,
+    /// ```
     /// ...
     /// ...
-    /// .##
+    /// .xx
+    /// ```
     Clockwise180,
+    /// ```
     /// ...
-    /// #..
-    /// #..
+    /// x..
+    /// x..
+    /// ```
     Clockwise270,
-    /// #..
-    /// #..
+    /// ```
+    /// x..
+    /// x..
     /// ...
+    /// ```
     DiagonallyFlipped,
-    /// .##
+    /// ```
+    /// .xx
     /// ...
     /// ...
+    /// ```
     DiagonallyFlippedClockwise90,
+    /// ```
     /// ...
-    /// ..#
-    /// ..#
+    /// ..x
+    /// ..x
+    /// ```
     DiagonallyFlippedClockwise180,
+    /// ```
     /// ...
     /// ...
-    /// ##.
+    /// xx.
+    /// ```
     DiagonallyFlippedClockwise270,
 }
 

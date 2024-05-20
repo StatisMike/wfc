@@ -190,6 +190,11 @@ impl retry::ImageRetry for retry::ParNumTimes {
     }
 }
 
+/// Generate image with Wave Function Collapse algorithm using provided `rng`
+/// state.
+///
+/// For more detailed documentation see [`generate_image`].
+#[allow(clippy::too_many_arguments)]
 pub fn generate_image_with_rng<W, F, IR, R>(
     image: &DynamicImage,
     pattern_size: NonZeroU32,
@@ -213,6 +218,45 @@ where
     )
 }
 
+/// Generate image with Wave Function Collapse algorithm using random seed.
+///
+/// For generation using fixed [`Rng`] see [`generate_image_with_rng`].
+///
+/// # Arguments
+/// - `image` - input [`DynamicImage`]. Source of [`ImagePatterns`] which will
+/// be used while building the output image.
+/// - `pattern_size` - size of the generated patterns. Smaller size means that
+/// the patterns in output image will be less similar to the input ones.
+/// - `output_size` - [`Size`] of the output image.
+/// - `orientations` - collection of [`Orientation`], signifying which
+/// transformations  can be made on generated *patterns* while building
+/// the output image.
+/// - `wrap` - [`Wrap`] strategy for the *patterns*.
+/// - `forbid` - rules restricting the positioning of the patterns in the output
+/// image.
+/// - `retry` - the retrying strategy upon encountering error during collapse.
+///
+/// # Example
+/// ```
+/// use std::num::NonZeroU32;
+///
+/// use wfc::{Orientation, Size, ForbidNothing};
+/// use wfc_image::{generate_image, retry, ImagePatterns, WrapXY};
+///
+/// let input_image = image::open("../wfc-image/examples/rooms.png").unwrap();
+/// let orientations = &[Orientation::Original];
+/// let output_size = Size::new(10, 10);
+///
+/// generate_image(
+///   &input_image,
+///   NonZeroU32::new(3).unwrap(),
+///   output_size,
+///   orientations,
+///   WrapXY,
+///   ForbidNothing,
+///   retry::NumTimes(10)
+/// ).expect("couldn't generate after 10 retries");
+/// ```
 pub fn generate_image<W, F, IR>(
     image: &DynamicImage,
     pattern_size: NonZeroU32,
