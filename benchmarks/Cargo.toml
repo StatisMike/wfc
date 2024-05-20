@@ -1,0 +1,15 @@
+[package]
+name = "benchmarks"
+version = "0.1.0"
+edition = "2021"
+
+[profile.dev]
+opt-level = 3
+
+[dependencies]
+wfc = { path = "../wfc" }
+wfc_image = { path = "../wfc-image" }
+image = { version = "0.24", default-features = false, features = ["png"] }
+coord_2d = "0.3"
+grid_2d = "0.15"
+rand = "0.8"
